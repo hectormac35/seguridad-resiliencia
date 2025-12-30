@@ -1,0 +1,2 @@
+[1/5] Estado targets Prometheus
+[2/5] Disparando fuerza bruta (60s)

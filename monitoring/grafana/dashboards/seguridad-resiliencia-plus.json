@@ -1,0 +1,43 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Fallos de login por minuto",
+      "targets": [
+        {"expr": "increase(login_failed_total[1m])", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Errores 5xx en /datos (rps)",
+      "targets": [
+        {"expr": "sum(rate(http_requests_total{path=\"/datos\", status=~\"5..\"}[1m]))", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Disponibilidad API (up)",
+      "targets": [
+        {"expr": "up{job=\"api\"}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["demo", "security", "resilience"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Seguridad & Resiliencia (Plus)",
+  "uid": "segres-plus",
+  "version": 1
+}

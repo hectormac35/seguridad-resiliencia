@@ -1,0 +1,3 @@
+== DEMO COMPLETA (UTC 20251226_192322) ==
+[+] URL base: http://localhost
+

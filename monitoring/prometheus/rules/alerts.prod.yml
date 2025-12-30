@@ -1,0 +1,56 @@
+groups:
+  - name: seguridad-resiliencia
+    interval: 30s
+    rules:
+
+      # ---- DISPONIBILIDAD ----
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          env: demo
+        annotations:
+          summary: "API caída (target down)"
+          description: "Prometheus no puede scrapeaar la API (up==0) durante 30s."
+
+      # ---- DEGRADACIÓN / ERRORES ----
+      - alert: Datos5xxSostenido
+        expr: sum(rate(http_requests_total{path="/datos", status=~"5.."}[1m])) > 0.2
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          env: demo
+        annotations:
+          summary: "/datos devuelve 5xx de forma sostenida"
+          description: "Tasa de 5xx en /datos (>0.2 rps) durante 30s. Posible DB no disponible."
+
+      # ---- SEGURIDAD ----
+      - alert: FuerzaBrutaLogin
+        expr: increase(login_failed_total[1m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: api
+          env: demo
+        annotations:
+          summary: "Posible fuerza bruta en /login"
+          description: "Más de 20 fallos de login en 1 minuto durante 30s."
+
+      # ---- RENDIMIENTO (P95) ----
+      # Solo funciona si tu histograma existe: http_request_duration_seconds_bucket
+      - alert: LatenciaP95DatosAlta
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{path="/datos"}[2m])) by (le)
+          ) > 1
+        for: 1m
+        labels:
+          severity: warning
+          service: api
+          env: demo
+        annotations:
+          summary: "Latencia p95 alta en /datos"
+          description: "La latencia p95 de /datos supera 1s durante 1 minuto."

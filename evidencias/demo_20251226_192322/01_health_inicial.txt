@@ -1,0 +1,3 @@
+[1] Health inicial
+{"servicio":"ok","app":"seguridad-resiliencia-api"}
+{"ok":true,"db_time":"2025-12-26 19:23:22.870792+00:00"}

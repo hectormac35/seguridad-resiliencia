@@ -1,0 +1,5 @@
+[2] Incidente resiliencia: DB pause -> /datos 503
+/estado -> 200
+/datos  -> 503
+Body /datos:
+{"ok":false,"modo":"degradado","razon":"db_no_disponible"}

@@ -1,0 +1,46 @@
+{
+  "id": null,
+  "uid": "api-mvp",
+  "title": "API MVP - Seguridad + Resiliencia",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Requests por status (http_requests_total)",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(http_requests_total[1m]))",
+          "legendFormat": "status={{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latencia p95 por ruta (http_request_duration_seconds)",
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket[1m])))",
+          "legendFormat": "p95 path={{path}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Logins fallidos (login_failed_total)",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(login_failed_total[1m])",
+          "legendFormat": "fails/s"
+        }
+      ]
+    }
+  ],
+  "templating": { "list": [] },
+  "annotations": { "list": [] }
+}

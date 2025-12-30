@@ -1,0 +1,6 @@
+[2] Incidente resiliencia: DB pause -> /datos 503
+[+] Pausando Postgres (docker compose pause db)...
+/estado -> 200
+/datos  -> 503
+Body /datos:
+{"ok":false,"modo":"degradado","razon":"db_no_disponible"}

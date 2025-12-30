@@ -1,0 +1,6 @@
+[1/6] Estado targets Prometheus
+[2/6] Tráfico a /datos (para histograma por path)
+[3/6] Disparando fuerza bruta (60s)
+[4/6] Alertas Prometheus
+[5/6] Alertas Alertmanager
+[6/6] Logs recientes Alertmanager

@@ -1,0 +1,4 @@
+[3] Recovery DB: unpause -> /datos 200
+[+] Reanudando Postgres (docker compose unpause db)...
+/datos  -> 200
+{"ok":true,"db_time":"2025-12-26 19:37:03.273298+00:00"}
