@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: Tests de la API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: api/requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
+  configuracion:
+    name: Validar configuración
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Compose
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+
+      - name: Reglas de Prometheus (promtool)
+        run: |
+          docker run --rm -v "$PWD/monitoring/prometheus:/p" --entrypoint promtool \
+            prom/prometheus:v2.55.1 check rules /p/rules/alerts.yml /p/rules/alerts.prod.yml
+
+      - name: Configuración de Alertmanager (amtool)
+        run: |
+          sed -e 's/__BOT_TOKEN__/123456789:token-de-prueba/' -e 's/__CHAT_ID__/1/' \
+            monitoring/alertmanager/alertmanager.yml.tpl > /tmp/alertmanager.yml
+          docker run --rm -v /tmp/alertmanager.yml:/am.yml --entrypoint amtool \
+            prom/alertmanager:v0.27.0 check-config /am.yml
+
+      - name: Configuración de Nginx
+        run: |
+          docker run --rm --add-host api:127.0.0.1 -v "$PWD/proxy/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            nginx:1.27 nginx -t
+
+      - name: Imagen de la API
+        run: docker build -t seguridad-resiliencia-api ./api

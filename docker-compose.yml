@@ -21,11 +21,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-    ports:
-      - "8000:8000"
+    # Sin puerto publicado: solo se accede a la API a través del proxy (rate limiting + cabeceras)
+    expose:
+      - "8000"
+    restart: unless-stopped
 
   db:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_DB: appdb
       POSTGRES_USER: appuser
@@ -42,6 +45,7 @@ services:
 
   proxy:
     image: nginx:1.27
+    restart: unless-stopped
     environment:
       - NGINX_ENTRYPOINT_QUIET_LOGS=1
     depends_on:
@@ -88,6 +92,20 @@ services:
 
   grafana:
     image: grafana/grafana:11.2.2
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards/provider.yml:/etc/grafana/provisioning/dashboards/provider.yml:ro
+      - ./monitoring/grafana/provisioning/dashboards/api_dashboard.json:/var/lib/grafana/dashboards/api_dashboard.json:ro
+      - ./monitoring/grafana/dashboards/seguridad-resiliencia-plus.json:/var/lib/grafana/dashboards/seguridad-resiliencia-plus.json:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - appnet
 networks:
   appnet:
 

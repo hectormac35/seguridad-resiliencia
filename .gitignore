@@ -5,3 +5,10 @@ __pycache__/
 .idea/
 .vscode/
 
+# Generado por render_alertmanager.sh a partir de .env (contiene el token)
+monitoring/alertmanager/alertmanager.yml
+
+# Python
+__pycache__/
+.pytest_cache/
+.venv/

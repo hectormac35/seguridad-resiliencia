@@ -40,11 +40,10 @@ groups:
           description: "Más de 20 fallos de login en 1 minuto durante 30s."
 
       # ---- RENDIMIENTO (P95) ----
-      # Solo funciona si tu histograma existe: http_request_duration_seconds_bucket
       - alert: LatenciaP95DatosAlta
         expr: |
           histogram_quantile(0.95,
-            sum(rate(http_request_duration_seconds_bucket[2m])) by (le)
+            sum(rate(http_request_duration_seconds_bucket{path="/datos"}[2m])) by (le)
           ) > 1
         for: 1m
         labels:
