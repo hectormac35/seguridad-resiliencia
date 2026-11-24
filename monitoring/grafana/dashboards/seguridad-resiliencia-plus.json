@@ -17,7 +17,7 @@
       "type": "timeseries",
       "title": "Errores 5xx en /datos (rps)",
       "targets": [
-        {"expr": "sum(rate(http_requests_total{path=\"/datos\", status=~\"5..\"}[1m]))", "refId": "A"}
+        {"expr": "sum(rate(http_requests_total{path=\"/datos\", status=~\"5..\"}[1m])) or vector(0)", "refId": "A"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
     },

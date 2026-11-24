@@ -1,4 +1,4 @@
-.PHONY: render up down restart logs ps demo test check
+.PHONY: render up down restart logs ps demo demo-evidencias test check
 
 render:
 	./monitoring/alertmanager/render_alertmanager.sh
@@ -18,7 +18,12 @@ logs:
 ps:
 	docker compose ps
 
+# Demo completa: caída de la BD, recuperación y fuerza bruta
 demo:
+	./chaos/demo_all.sh
+
+# Tráfico + fuerza bruta y volcado de alertas de Prometheus/Alertmanager a evidencias/
+demo-evidencias:
 	./evidencias/demo_all.sh
 
 # Tests de la API (necesita Python 3.12+)

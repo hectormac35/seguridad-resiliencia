@@ -6,10 +6,10 @@ que el sistema los **detecta, avisa y se recupera solo**, como se haría en un e
 Incluye una API detrás de un proxy Nginx endurecido, PostgreSQL y un stack completo de observabilidad:
 **Prometheus** para métricas y reglas, **Alertmanager** para avisar por **Telegram** y **Grafana** para los dashboards.
 
-![Demo de un incidente real](docs/capturas/demo-incidente.png)
+![Dashboard de Grafana durante un incidente](docs/capturas/grafana-dashboard.png)
 
-*Ejecución real de la demo: cae la base de datos y llega un ataque de fuerza bruta. En 45 s salta la primera alerta,
-Alertmanager las agrupa y, cuando vuelve la base de datos, todo se resuelve sin tocar la API.*
+*Grafana durante un incidente real: un ataque de fuerza bruta contra `/login` (cortado en su mayoría por el rate limiting
+de Nginx), 90 segundos con la base de datos caída (errores 5xx en `/datos`) y la API disponible en todo momento.*
 
 ---
 
@@ -56,6 +56,17 @@ Solo el proxy está expuesto al exterior: la API no publica su puerto y `/metric
 
 Hay dos juegos de reglas: `alerts.yml` (demo, reacciona en segundos) y `alerts.prod.yml` (umbrales más tolerantes, para no generar ruido).
 
+Durante la caída, Alertmanager agrupa las alertas y las envía al receptor de Telegram:
+
+![Alertmanager con las alertas activas](docs/capturas/alertmanager.png)
+
+Y así se ve la demo en la terminal, de principio a fin:
+
+![Demo de un incidente real](docs/capturas/demo-incidente.png)
+
+*Cae la base de datos y llega un ataque de fuerza bruta. En 45 s salta la primera alerta, Alertmanager las agrupa y,
+cuando vuelve la base de datos, todo se resuelve en un minuto sin tocar la API.*
+
 | Alertas activas en Prometheus | Errores en `/datos` durante tres caídas de la BD |
 |---|---|
 | ![Alertas en Prometheus](docs/capturas/prometheus-alertas.png) | ![Errores 503 en /datos](docs/capturas/prometheus-errores-datos.png) |
@@ -72,7 +83,7 @@ Hay dos juegos de reglas: `alerts.yml` (demo, reacciona en segundos) y `alerts.p
 | `chaos/wait_db_healthy.sh` | Espera a que la BD vuelva a estar sana |
 | `chaos/bruteforce_login.sh` | Ataque de fuerza bruta contra `/login` |
 | `chaos/demo_incidente_db.sh` · `chaos/demo_incidente_login.sh` | Incidente completo: fallo → alerta → recuperación |
-| `chaos/demo_all.sh` | Toda la demo de una vez |
+| `chaos/demo_all.sh` | Toda la demo de una vez (`make demo`) |
 
 Cada ejecución guarda **evidencias** con fecha en `evidencias/` (salud inicial, incidente, recuperación,
 alertas activas en Prometheus y Alertmanager y logs del proxy), como se haría para un post-mortem.
@@ -86,7 +97,8 @@ Requisitos: Docker con Docker Compose v2 y Make.
 ```bash
 cp .env.example .env      # rellena TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID y la contraseña de Grafana
 make up                   # genera la config de Alertmanager y levanta todo
-make demo                 # ejecuta la demo de incidentes
+make demo                 # demo completa: caída de la BD, recuperación y fuerza bruta
+make demo-evidencias      # tráfico + fuerza bruta y volcado de alertas a evidencias/
 make down
 ```
 
@@ -95,7 +107,13 @@ make down
 | API (a través del proxy) | http://localhost |
 | Prometheus | http://localhost:9090 |
 | Alertmanager | http://localhost:9093 |
-| Grafana | http://localhost:3000 (usuario `admin`) |
+| Grafana | http://localhost:3000 (usuario `admin`, contraseña `GRAFANA_ADMIN_PASSWORD` del `.env`) |
+
+Grafana arranca con Prometheus como fuente de datos y dos dashboards ya cargados:
+**Seguridad & Resiliencia (Plus)** y **API MVP**.
+
+> Si vienes de una versión anterior y `/datos` devuelve `503` con `password authentication failed` en los logs de la API,
+> tu volumen de PostgreSQL se creó con otra contraseña. Recréalo con `docker compose down -v && make up`.
 
 ### Endpoints de la API
 
